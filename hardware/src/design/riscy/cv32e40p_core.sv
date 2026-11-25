@@ -125,6 +125,10 @@ module cv32e40p_core
   localparam APU = (FPU == 1) ? 1 : 0;
 
 
+  // Custom AES Extension Bus.
+  logic [31:0] instr_id_ex;
+
+
   // IF/ID signals
   logic        instr_valid_id;
   logic [31:0] instr_rdata_id;  // Instruction sampled inside IF stage
@@ -572,6 +576,7 @@ module cv32e40p_core
 
       // From the Pipeline ID/EX
       .pc_ex_o(pc_ex),
+      .instr_ex_o(instr_id_ex),
 
       .alu_en_ex_o        (alu_en_ex),
       .alu_operator_ex_o  (alu_operator_ex),
@@ -827,6 +832,8 @@ module cv32e40p_core
       .csr_rdata_i (csr_rdata),
 
       // From ID Stage: Regfile control signals
+      .instr_rdata_i(instr_id_ex),
+
       .branch_in_ex_i     (branch_in_ex),
       .regfile_alu_waddr_i(regfile_alu_waddr_ex),
       .regfile_alu_we_i   (regfile_alu_we_ex),

@@ -600,8 +600,38 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
 
       OPCODE_OP: begin  // Register-Register ALU operation
 
+        // =================================================================================
+        // AES Scalar Cryptography Extension (Zkne).
+        // =================================================================================
+        // Isolate bits 29:25 to decode regardless of the dynamic bs bits
+        // (31:30).
+        if (instr_rdata_i[14:12] == 3'b000 && instr_rdata_i[29:25] == 5'b10011) begin // aes32esmi
+          alu_operator_o = ALU_AES_ESMI;
+          regfile_alu_we = 1'b1;
+          rega_used_o = 1'b1;
+          regb_used_o = 1'b1;
+        end
+        else if (instr_rdata_i[14:12] == 3'b000 && instr_rdata_i[29:25] == 5'b10001) begin // aes32esi
+          alu_operator_o = ALU_AES_ESI;
+          regfile_alu_we = 1'b1;
+          rega_used_o = 1'b1;
+          regb_used_o = 1'b1;
+        end
+        else if (instr_rdata_i[14:12] == 3'b000 && instr_rdata_i[29:25] == 5'b11000) begin // aes32ks1i
+          alu_operator_o = ALU_AES_KS1I;
+          regfile_alu_we = 1'b1;
+          rega_used_o = 1'b1;
+          regb_used_o = 1'b1;
+        end
+        else if (instr_rdata_i[14:12] == 3'b000 && instr_rdata_i[29:25] == 5'b011001) begin // aes32ks2
+          alu_operator_o = ALU_AES_KS2;
+          regfile_alu_we = 1'b1;
+          rega_used_o = 1'b1;
+          regb_used_o = 1'b1;
+        end
+
         // PREFIX 11
-        if (instr_rdata_i[31:30] == 2'b11) begin
+        else if (instr_rdata_i[31:30] == 2'b11) begin
           if (PULP_XPULP) begin
             //////////////////////////////
             // IMMEDIATE BIT-MANIPULATION

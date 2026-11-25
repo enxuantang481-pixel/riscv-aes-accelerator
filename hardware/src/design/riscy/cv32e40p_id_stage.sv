@@ -93,6 +93,7 @@ module cv32e40p_id_stage
 
     // Pipeline ID/EX
     output logic [31:0] pc_ex_o,
+    output logic [31:0] instr_ex_o,
 
     output logic [31:0] alu_operand_a_ex_o,
     output logic [31:0] alu_operand_b_ex_o,
@@ -1403,6 +1404,7 @@ module cv32e40p_id_stage
 
   always_ff @(posedge clk, negedge rst_n) begin : ID_EX_PIPE_REGISTERS
     if (rst_n == 1'b0) begin
+      instr_ex_o             <= '0;
       alu_en_ex_o            <= '0;
       alu_operator_ex_o      <= ALU_SLTU;
       alu_operand_a_ex_o     <= '0;
@@ -1490,6 +1492,8 @@ module cv32e40p_id_stage
       // normal pipeline unstall case
 
       if (id_valid_o) begin  // unstall the whole pipeline
+        instr_ex_o <= instr;
+
         alu_en_ex_o <= alu_en;
         if (alu_en) begin
           alu_operator_ex_o   <= alu_operator;

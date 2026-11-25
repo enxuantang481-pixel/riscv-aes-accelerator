@@ -166,8 +166,10 @@ task main_core_execution();
         zynq_tb.zynq_sys.riscv_i.processing_system7_0.inst.read_data(zynq_tb.base_addr_reg_bank+32'h04,4,zynq_tb.end_read_data,zynq_tb.resp);
         // display how many clk cycles
         $display ("Test completed in %0d clk cycles", zynq_tb.end_read_data);
-    end
 
+        zynq_tb.zynq_sys.riscv_i.processing_system7_0.inst.read_data(zynq_tb.base_addr_reg_bank + 32'h08, 4, zynq_tb.end_read_data, zynq_tb.resp);
+        $display("Key schedule completed in %0d clk cycles", zynq_tb.end_read_data);
+    end
     // Lets read expected ciphertext
     for (int i=0; i<4; i++) begin
         zynq_tb.zynq_sys.riscv_i.processing_system7_0.inst.read_data(zynq_tb.expected_result_addr + (32'h4*i),4,zynq_tb.expected_datas[i],zynq_tb.resp);

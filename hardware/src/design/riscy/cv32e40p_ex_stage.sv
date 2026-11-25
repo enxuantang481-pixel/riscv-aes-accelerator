@@ -116,6 +116,7 @@ module cv32e40p_ex_stage
     input logic [31:0] lsu_rdata_i,
 
     // input from ID stage
+    input logic [31:0] instr_rdata_i,
     input logic       branch_in_ex_i,
     input logic [5:0] regfile_alu_waddr_i,
     input logic       regfile_alu_we_i,
@@ -176,6 +177,33 @@ module cv32e40p_ex_stage
   logic        apu_req;
   logic        apu_gnt;
 
+  // AES signals.
+  logic [1:0]  aes_bs;
+  logic        aes_is_middle;
+  logic [31:0] aes_result;
+
+  logic [3:0]  aes_rnum;
+  logic        aes_is_ks1i;
+  logic        aes_is_ks2;
+
+  assign aes_bs = instr_rdata_i[31:30];
+  assign aes_is_middle = (alu_operator_i == ALU_AES_ESMI);
+
+  assign aes_rnum = instr_rdata_i[23:20];
+  assign aes_is_ks1i = (alu_operator_i == ALU_AES_KS1I);
+  assign aes_is_ks2 = (alu_operator_i == ALU_AES_KS2);
+
+  cv32e40p_aes_unit aes_unit_i (
+    .rs1_i        (alu_operand_a_i),
+    .rs2_i        (alu_operand_b_i),
+    .bs_i         (aes_bs),
+    .is_middle_i  (aes_is_middle),
+    .is_ks1i_i  (aes_is_ks1i),
+    .is_ks2_i   (aes_is_ks2),
+    .rnum_i       (aes_rnum),
+    .rd_o         (aes_result)
+    );
+
   // ALU write port mux
   always_comb begin
     regfile_alu_wdata_fw_o = '0;
@@ -195,7 +223,13 @@ module cv32e40p_ex_stage
     end else begin
       regfile_alu_we_fw_o    = regfile_alu_we_i & ~apu_en_i;  // private fpu incomplete?
       regfile_alu_waddr_fw_o = regfile_alu_waddr_i;
-      if (alu_en_i) regfile_alu_wdata_fw_o = alu_result;
+
+      if (alu_en_i) begin
+        if (alu_operator_i == ALU_AES_ESMI || alu_operator_i == ALU_AES_ESI || alu_operator_i == ALU_AES_KS1I || alu_operator_i == ALU_AES_KS2)
+          regfile_alu_wdata_fw_o = aes_result; // aes arithmatic feedback.
+        else
+          regfile_alu_wdata_fw_o = alu_result; // standard arithmatic feedback.
+      end
       if (mult_en_i) regfile_alu_wdata_fw_o = mult_result;
       if (csr_access_i) regfile_alu_wdata_fw_o = csr_rdata_i;
     end

@@ -53,7 +53,10 @@ package cv32e40p_pkg;
   parameter OPCODE_STORE_FP = 7'h27;
   parameter OPCODE_LOAD_FP = 7'h07;
   parameter OPCODE_AMO = 7'h2F;
-
+  
+  // All four aes encryption and decryption instructions have the same opcode.
+  parameter OPCODE_AES = 7'h33; // recall that this has the same opcode as OPCODE_OP, distinguish it with funct3/funct7.
+  
   // those opcodes are now used for PULP custom instructions
   // parameter OPCODE_CUST0     = 7'h0b
   // parameter OPCODE_CUST1     = 7'h2b
@@ -83,6 +86,14 @@ package cv32e40p_pkg;
   parameter ALU_OP_WIDTH = 7;
 
   typedef enum logic [ALU_OP_WIDTH-1:0] {
+
+    // Unique ALU aes encryption instruction identifiers have been added.
+    ALU_AES_ESMI = 7'b1100000,
+    ALU_AES_ESI = 7'b1100001,
+
+    ALU_AES_KS1I = 7'b1100010,
+    ALU_AES_KS2 = 7'b1100011,
+
 
     ALU_ADD   = 7'b0011000,
     ALU_SUB   = 7'b0011001,
